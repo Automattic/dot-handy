@@ -2,10 +2,14 @@
   "name": "dot-handy",
   "version": "1.0.0",
   "description": "The dotcom testing assistant tool with composable configuration and automation scripts that makes your manual QA life easier.",
-  "main": "run.js",
+  "main": "main.js",
   "author": "James Tien <james.tien@automattic.com>",
   "license": "MIT",
+	"scripts": {
+		"start": "DEBUG=pw:api node main.js"
+	},
   "devDependencies": {
-    "playwright": "^1.8.1"
+    "playwright": "^1.8.1",
+    "yargs": "^16.2.0"
   }
 }

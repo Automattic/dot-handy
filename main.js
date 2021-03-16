@@ -12,18 +12,17 @@ const parseCommandLine = () => {
 	const argv = yargs
 		.option( 'config-files', {
 			alias: 'C',
-			default: '',
 			type: 'string',
 		} )
 		.option( 'action-files', {
 			alias: 'A',
-			default: '',
 			type: 'string',
 		} )
 		.argv;
 
-	const configFiles = argv.configFiles.split( ',' );
-	const actionFiles = argv.actionFiles.split( ',' );
+	// FIXME: too ugly
+	const configFiles = argv.configFiles && argv.configFiles.split( ',' ) || [];
+	const actionFiles = argv.actionFiles && argv.actionFiles.split( ',' ) || [];
 
 	return {
 		configFiles,
@@ -46,13 +45,16 @@ const main = async () => {
 		process.exit( -1 );
 	}
 
-	console.log( '------ The configuration: ', unionConfig );
+	console.log( '------ Configuration:\n', unionConfig );
 
 	const actions = readActionFiles( actionFiles );
 
 	if ( ! actions ) {
 		process.exit( -1 );
 	}
+
+	console.log( '------ Series of action scripts that will be performing:\n' );
+	console.log( actionFiles );
 
 	const {
 		browser,
@@ -68,29 +70,3 @@ const main = async () => {
 }
 
 main();
-
-// main();
-
-// ( async () => {
-// 	const browser = await chromium.launch( {
-// 		headless: false,
-// 	} );
-// 	const context = await browser.newContext( {
-// 		locale: 'en',
-// 	} );
-// 	const page = await context.newPage();
-//
-// 	await page.goto( 'https://wordpress.com/start' );
-// 	// await page.goto( 'http://calypso.localhost:3000/start' );
-//
-// 	// domain step
-// 	const freeDomain = userName + '.wordpress.com';
-// 	await page.fill( 'css=input[type="search"]', freeDomain );
-// 	await page.click( 'css=div[data-e2e-domain*="' + freeDomain + '" >> css=button[type="button"]' );
-//
-// 	await page.waitForNavigation();
-//
-// 	// plan step
-// 	await page.click( 'css=.plans-features-main__banner-content >> css=button[type="button"]' );
-// 	await page.waitForNavigation();
-// } )();

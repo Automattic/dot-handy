@@ -7,6 +7,7 @@ const yargs = require( 'yargs' );
  * Internal dependencies
  */
 const { readConfigFiles, readActionFiles, initialize } = require( './lib/init.js' );
+const { getRootUrlFromEnv } = require( './lib/misc.js' );
 
 const parseCommandLine = () => {
 	const argv = yargs
@@ -47,11 +48,12 @@ const main = async () => {
 
 	console.log( '------ Configuration:\n', unionConfig );
 
-	const actions = readActionFiles( actionFiles );
-
-	if ( ! actions ) {
-		process.exit( -1 );
+	if ( actionFiles.length === 0 ) {
+		console.log( '------ No action provided. The default one will be queued.' );
+		actionFiles.push( 'default-action' );
 	}
+
+	const actions = readActionFiles( actionFiles );
 
 	console.log( '------ Series of action scripts that will be performing:\n' );
 	console.log( actionFiles );
@@ -62,12 +64,14 @@ const main = async () => {
 		page,
 	} = await initialize( unionConfig );
 
-	const extra = {};
+	const extra = {
+		config: unionConfig, // to make it accessible in each action.
+	};
 	let firstNavigation = true;
 	for ( const action of actions ) {
 		if ( action.initialPath ) {
 			if ( firstNavigation ) {
-				await page.goto( unionConfig.rootUrl + action.initialPath );
+				await page.goto( getRootUrlFromEnv( unionConfig.env ) + action.initialPath );
 				firstNavigation = false;
 			} else {
 				await page.waitForNavigation( action.initialPath );

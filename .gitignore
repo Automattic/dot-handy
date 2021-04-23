@@ -19,6 +19,7 @@ node_modules
 *.sw?
 !*.swf
 .eslintcache
+.lvimrc
 test-results*.xml
 lerna-debug.log
 yarn-error.log

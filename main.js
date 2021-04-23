@@ -74,6 +74,8 @@ const main = async () => {
 	const configs = readConfigFiles( [
 		'default-config',
 		...configFiles,
+		...actionFiles, // A very opinionated functionality that it will by default look up for configuration files having the same name.
+						// so actions like login and new-user can be used without having to supply their local configs everytime.
 	] );
 
 	if ( ! configs ) {

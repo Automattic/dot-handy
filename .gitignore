@@ -23,3 +23,5 @@ node_modules
 test-results*.xml
 lerna-debug.log
 yarn-error.log
+
+local-configs/*.json

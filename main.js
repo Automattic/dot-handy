@@ -118,6 +118,12 @@ const main = async () => {
 		}
 
 		const newExtra = await action.run( browser, context, page, extra )
+
+		// TODO: Terrible. Generalize this thing by some common senses.
+		if ( newExtra.abort ) {
+			process.exit( -1 );
+		}
+
 		Object.assign( extra, newExtra );
 	}
 }

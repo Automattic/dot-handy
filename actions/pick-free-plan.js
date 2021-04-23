@@ -1,7 +1,11 @@
-// Pick the Free plan at the /plans step
-module.exports = async ( browser, context, page, extra ) => {
-	await page.click( 'css=#step-header >> css=button[type="button"]' );
-	await page.waitForNavigation();
+const { createAction } = require( '../lib/action' );
 
-	return {}
-}
+// Pick the Free plan at the /plans step
+module.exports = createAction(
+	async ( browser, context, page, extra ) => {
+		await page.click( 'css=#step-header >> css=button[type="button"]' );
+
+		return {};
+	},
+	'/plans'
+);

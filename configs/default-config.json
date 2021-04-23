@@ -1,6 +1,5 @@
 {
 	"browser": "chromium",
 	"locale": "en",
-	"rootUrl": "https://wordpress.com",
-	"initialPath": "/"
+	"rootUrl": "https://wordpress.com"
 }

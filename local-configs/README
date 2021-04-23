@@ -1,2 +1,2 @@
 Please put whatever local configs that are not appropriate to share as part of the source repo.
-A good example is the password you'd like to use for the test accounts.
+A good example is the account credentials of the test account that you'd like to use for the login action.

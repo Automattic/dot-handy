@@ -63,8 +63,18 @@ const main = async () => {
 	} = await initialize( unionConfig );
 
 	const extra = {};
+	let firstNavigation = true;
 	for ( const action of actions ) {
-		const newExtra = await action( browser, context, page, extra )
+		if ( action.initialPath ) {
+			if ( firstNavigation ) {
+				await page.goto( unionConfig.rootUrl + action.initialPath );
+				firstNavigation = false;
+			} else {
+				await page.waitForNavigation( action.initialPath );
+			}
+		}
+
+		const newExtra = await action.run( browser, context, page, extra )
 		Object.assign( extra, newExtra );
 	}
 }

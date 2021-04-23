@@ -9,6 +9,25 @@ const yargs = require( 'yargs' );
 const { readConfigFiles, readActionFiles, initialize } = require( './lib/init.js' );
 const { getRootUrlFromEnv } = require( './lib/misc.js' );
 
+// TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params.
+const parseOverrides = ( argv ) => {
+	const eligibleParams = [
+		'locale',
+		'env',
+		'path',
+	];
+
+	const overrides = {};
+
+	for( const key of eligibleParams ) {
+		if ( argv[ key ] ) {
+			overrides[ key ] = argv[ key ];
+		}
+	}
+
+	return overrides;
+};
+
 const parseCommandLine = () => {
 	const argv = yargs
 		.option( 'config-files', {
@@ -19,15 +38,29 @@ const parseCommandLine = () => {
 			alias: 'A',
 			type: 'string',
 		} )
+		.option( 'locale', {
+			alias: 'L',
+			type: 'string',
+		} )
+		.option( 'env', {
+			alias: 'E',
+			type: 'string',
+		} )
+		.option( 'path', {
+			alias: 'P',
+			type: 'string',
+		} )
 		.argv;
 
 	// FIXME: too ugly
 	const configFiles = argv.configFiles && argv.configFiles.split( ',' ) || [];
 	const actionFiles = argv.actionFiles && argv.actionFiles.split( ',' ) || [];
+	const overrides = parseOverrides( argv );
 
 	return {
 		configFiles,
 		actionFiles,
+		overrides,
 	};
 };
 
@@ -35,16 +68,22 @@ const main = async () => {
 	const {
 		configFiles,
 		actionFiles,
+		overrides,
 	} = parseCommandLine();
 
-	const unionConfig = readConfigFiles( [
+	const configs = readConfigFiles( [
 		'default-config',
 		...configFiles,
 	] );
 
-	if ( ! unionConfig ) {
+	if ( ! configs ) {
 		process.exit( -1 );
 	}
+
+	const unionConfig = {
+		...configs,
+		...overrides,
+	};
 
 	console.log( '------ Configuration:\n', unionConfig );
 
@@ -69,7 +108,7 @@ const main = async () => {
 	};
 	let firstNavigation = true;
 	for ( const action of actions ) {
-		if ( action.initialPath ) {
+		if ( action.initialPath != null ) {
 			if ( firstNavigation ) {
 				await page.goto( getRootUrlFromEnv( unionConfig.env ) + action.initialPath );
 				firstNavigation = false;

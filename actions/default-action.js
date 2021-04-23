@@ -9,5 +9,5 @@ module.exports = createAction(
 
 		return {};
 	},
-	'/'
+	''
 );

@@ -15,6 +15,8 @@ const parseOverrides = ( argv ) => {
 		'locale',
 		'env',
 		'path',
+		'username',
+		'password',
 	];
 
 	const overrides = {};
@@ -48,6 +50,12 @@ const parseCommandLine = () => {
 		} )
 		.option( 'path', {
 			alias: 'P',
+			type: 'string',
+		} )
+		.option( 'username', {
+			type: 'string',
+		} )
+		.option( 'password', {
 			type: 'string',
 		} )
 		.argv;
@@ -124,6 +132,11 @@ const main = async () => {
 		// TODO: Terrible. Generalize this thing by some common senses.
 		if ( newExtra.abort ) {
 			process.exit( -1 );
+		}
+
+		// An intentional close.
+		if ( newExtra.done ) {
+			process.exit( 0 );
 		}
 
 		Object.assign( extra, newExtra );

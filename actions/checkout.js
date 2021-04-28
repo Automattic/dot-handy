@@ -3,29 +3,35 @@ const { createAction } = require( '../lib/action' );
 // Checkout by the dummy card.
 module.exports = createAction(
 	async ( browser, context, page, extra ) => {
-		await page.waitForSelector( 'css=.cart__total-amount.grand-total' );
+		// Wait for the grand total
+		await page.waitForSelector( 'css=.wp-checkout-order-summary__total-price' );
 
-		await page.fill( 'css=input#name', 'Jam Foo' );
+		// Fill in the postal code and select the country
+		await page.fill( 'css=input#contact-postal-code', '326' );
+		await page.selectOption( 'css=select#country-selector', 'TW' );
 
-		let cardNumberFrame = page.frame( '__privateStripeFrame5' );
+		await page.click( 'css=.checkout-step.is-active >> css=button.checkout-button' );
 
-		while ( ! cardNumberFrame ) {
-			await page.waitForTimeout( 3000 );
-			cardNumberFrame = page.frame( '__privateStripeFrame5' );
-		}
+		// Fill in the card holder name.
+		await page.fill( 'css=input#cardholder-name', 'Jam Foo' );
 
+		// Fill in the dummy card number
+		const cardNumberElement = await page.$( 'span.number .__PrivateStripeElement iframe' );
+		const cardNumberFrame = await cardNumberElement.contentFrame();
 		await cardNumberFrame.fill( 'css=input[name="cardnumber"]', '4242424242424242' );
 
-		const expDateFrame = page.frame( '__privateStripeFrame6' );
-		await expDateFrame.fill( 'css=input[name="exp-date"]', '03/28' );
+		// Fill in the dummy expiry date
+		const expiryDateElement = await page.$( 'span.expiration-date .__PrivateStripeElement iframe' );
+		const expiryDateFrame = await expiryDateElement.contentFrame();
+		await expiryDateFrame.fill( 'css=input[name="exp-date"]', '0328' );
 
-		const cvcFrame = page.frame( '__privateStripeFrame7' );
-		await cvcFrame.fill( 'css=input[name="cvc"]', '888' );
+		// Fill in the dummy security code
+		const securityCodeElement = await page.$( 'span.cvv .__PrivateStripeElement iframe' );
+		const securityCodeFrame = await securityCodeElement.contentFrame();
+		await securityCodeFrame.fill( 'css=input[name="cvc"]', '888' );
 
-		await page.selectOption( 'css=select[name="country"]', 'TW' );
-		await page.fill( 'css=input[name="postal-code"]', '326' );
-
-		await page.click( 'css=button.button-pay' );
+		// Checkout
+		await page.click( 'css=.checkout-submit-button >> css=button.checkout-button' );
 	},
 	'/checkout'
 );

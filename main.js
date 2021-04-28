@@ -130,16 +130,19 @@ const main = async () => {
 		const newExtra = await action.run( browser, context, page, extra )
 
 		// TODO: Terrible. Generalize this thing by some common senses.
-		if ( newExtra.abort ) {
-			process.exit( -1 );
-		}
+		if ( newExtra ) {
+			// An action claims that there is something worth aborting.
+			if ( newExtra.abort ) {
+				process.exit( -1 );
+			}
 
-		// An intentional close.
-		if ( newExtra.done ) {
-			process.exit( 0 );
-		}
+			// An intentional exit that indicates no further action should follow.
+			if ( newExtra.done ) {
+				process.exit( 0 );
+			}
 
-		Object.assign( extra, newExtra );
+			Object.assign( extra, newExtra );
+		}
 	}
 }
 

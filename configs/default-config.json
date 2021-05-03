@@ -1,5 +1,6 @@
 {
 	"browser": "chromium",
 	"locale": "en",
-	"env": "production"
+	"env": "production",
+	"localStorage": []
 }

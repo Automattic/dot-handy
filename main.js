@@ -6,7 +6,12 @@ const yargs = require( 'yargs' );
 /**
  * Internal dependencies
  */
-const { readConfigFiles, readActionFiles, initialize } = require( './lib/init.js' );
+const {
+	configLocalStorage,
+	readConfigFiles,
+	readActionFiles,
+	initialize
+} = require( './lib/init.js' );
 const { getRootUrlFromEnv } = require( './lib/misc.js' );
 
 // TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params.
@@ -17,6 +22,7 @@ const parseOverrides = ( argv ) => {
 		'path',
 		'username',
 		'password',
+		'localstorage',
 	];
 
 	const overrides = {};
@@ -32,30 +38,34 @@ const parseOverrides = ( argv ) => {
 
 const parseCommandLine = () => {
 	const argv = yargs
-		.option( 'config-files', {
-			alias: 'C',
-			type: 'string',
-		} )
 		.option( 'action-files', {
 			alias: 'A',
 			type: 'string',
 		} )
-		.option( 'locale', {
-			alias: 'L',
+		.option( 'config-files', {
+			alias: 'C',
 			type: 'string',
 		} )
 		.option( 'env', {
 			alias: 'E',
 			type: 'string',
 		} )
+		.option( 'locale', {
+			alias: 'LC',
+			type: 'string',
+		} )
+		.option( 'localstorage', {
+			alias: 'LS',
+			type: 'string',
+		} )
 		.option( 'path', {
 			alias: 'P',
 			type: 'string',
 		} )
-		.option( 'username', {
+		.option( 'password', {
 			type: 'string',
 		} )
-		.option( 'password', {
+		.option( 'username', {
 			type: 'string',
 		} )
 		.argv;
@@ -121,6 +131,10 @@ const main = async () => {
 		if ( action.initialPath != null ) {
 			if ( firstNavigation ) {
 				await page.goto( getRootUrlFromEnv( unionConfig.env ) + action.initialPath );
+				if ( unionConfig.localStorage ) {
+					await configLocalStorage( page, unionConfig.localStorage );
+				}
+
 				firstNavigation = false;
 			} else {
 				await page.waitForNavigation( action.initialPath );

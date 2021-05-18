@@ -1,7 +1,7 @@
-const { createAction } = require( '../lib/action.js' );
+const { createPreparation } = require( '../lib/action.js' );
 
 // Set the variation of an ExPlat experiment.
-module.exports = createAction(
+module.exports = createPreparation(
 	async ( browser, context, page, extra ) => {
 		const { explatExperiments } = extra.config;
 

@@ -112,10 +112,10 @@ const main = async () => {
 		actionFiles.push( 'default-action' );
 	}
 
-	const actions = readActionFiles( actionFiles );
-
 	console.log( '------ Series of action scripts that will be performing:\n' );
 	console.log( actionFiles );
+
+	const actions = readActionFiles( actionFiles );
 
 	const {
 		browser,
@@ -127,7 +127,16 @@ const main = async () => {
 		config: unionConfig, // to make it accessible in each action.
 	};
 	let firstNavigation = true;
+	let preps = [];
 	for ( const action of actions ) {
+		// A "preparation" action is a special kind of actions that are queued and run before a normal action.
+		// A good example for this is `set-explat`. It doesn't have any specific starting point, and will normally need
+		// to happen right after navigation but before the automated actions taking place.
+		if ( action.isPreparation ) {
+			preps.push( action );
+			continue;
+		}
+
 		if ( action.initialPath != null ) {
 			if ( firstNavigation ) {
 				await page.goto( getRootUrlFromEnv( unionConfig.env ) + action.initialPath );
@@ -140,6 +149,11 @@ const main = async () => {
 				await page.waitForNavigation( action.initialPath );
 			}
 		}
+		// finish up all the queued preparation
+		for ( const preparation of preps ) {
+			await preparation.run( browser, context, page, extra )
+		}
+		preps = [];
 
 		const newExtra = await action.run( browser, context, page, extra )
 

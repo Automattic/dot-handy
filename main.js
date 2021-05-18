@@ -12,7 +12,7 @@ const {
 	readActionFiles,
 	initialize
 } = require( './lib/init.js' );
-const { getRootUrlFromEnv } = require( './lib/misc.js' );
+const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.js' );
 
 // TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params.
 const parseOverrides = ( argv ) => {
@@ -70,9 +70,8 @@ const parseCommandLine = () => {
 		} )
 		.argv;
 
-	// FIXME: too ugly
-	const configFiles = argv.configFiles && argv.configFiles.split( ',' ) || [];
-	const actionFiles = argv.actionFiles && argv.actionFiles.split( ',' ) || [];
+	const configFiles = parseNonSpaceSeparatedList( argv.configFiles );
+	const actionFiles = parseNonSpaceSeparatedList( argv.actionFiles );
 	const overrides = parseOverrides( argv );
 
 	return {

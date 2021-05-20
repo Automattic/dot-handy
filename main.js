@@ -107,8 +107,8 @@ const main = async () => {
 	console.log( '------ Configuration:\n', unionConfig );
 
 	if ( actionFiles.length === 0 ) {
-		console.log( '------ No action provided. The default one will be queued.' );
-		actionFiles.push( 'default-action' );
+		console.log( '------ No action provided. The default "navigate" will be queued.' );
+		actionFiles.push( 'navigate' );
 	}
 
 	console.log( '------ Series of action scripts that will be performing:\n' );

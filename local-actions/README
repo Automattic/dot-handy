@@ -1,0 +1,2 @@
+Just like `local-configs`. There will be custom-built actions that aren't appropriate to put in a public repo, or are just not general enough for doing so.
+Please put them in this folder.

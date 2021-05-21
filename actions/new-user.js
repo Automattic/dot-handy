@@ -22,7 +22,7 @@ module.exports = createAction(
 		}
 
 		const randSerial = generateRandomString( 8 );
-		const email = newUserGmailPrefix + randSerial + '@gmail.com';
+		const email = newUserGmailPrefix + '+' + randSerial + '@gmail.com';
 		const userName = newUserGmailPrefix + randSerial;
 
 		await page.fill( 'css=input#email', email );

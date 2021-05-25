@@ -25,3 +25,4 @@ lerna-debug.log
 yarn-error.log
 
 local-configs/*.json
+local-actions/*.json

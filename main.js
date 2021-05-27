@@ -10,26 +10,33 @@ const {
 	configLocalStorage,
 	readConfigFiles,
 	readActionFiles,
-	initialize
+	initialize,
+	mergeConfig,
 } = require( './lib/init.js' );
 const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.js' );
 
-// TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params.
+// TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params. I should consider to implement a config schema.
 const parseOverrides = ( argv ) => {
 	const eligibleParams = [
-		'locale',
+		'cookies',
 		'env',
 		'path',
 		'username',
 		'password',
 		'localstorage',
+		'locale',
 	];
 
 	const overrides = {};
 
 	for( const key of eligibleParams ) {
 		if ( argv[ key ] ) {
-			overrides[ key ] = argv[ key ];
+			// FIXME: terrible!
+			if ( key == 'localstorage' || key == 'cookies' ) {
+				overrides[ key ] = JSON.parse( argv[ key] );
+				continue;
+			}
+			overrides[ key ] = argv[ key];
 		}
 	}
 
@@ -44,6 +51,9 @@ const parseCommandLine = () => {
 		} )
 		.option( 'config-files', {
 			alias: 'C',
+			type: 'string',
+		} )
+		.option( 'cookies', {
 			type: 'string',
 		} )
 		.option( 'env', {
@@ -99,10 +109,7 @@ const main = async () => {
 		process.exit( -1 );
 	}
 
-	const unionConfig = {
-		...configs,
-		...overrides,
-	};
+	const unionConfig = mergeConfig( configs, overrides );
 
 	console.log( '------ Configuration:\n', unionConfig );
 

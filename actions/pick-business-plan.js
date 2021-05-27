@@ -5,6 +5,8 @@ module.exports = createAction(
 	async ( browser, context, page, extra ) => {
 		// plan step
 		await page.click( 'css=button.is-business-plan' );
+
+		return {};
 	},
-	'/plans/
+	'/plans/'
 );

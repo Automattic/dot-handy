@@ -18,6 +18,7 @@ const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.j
 // TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params. I should consider to implement a config schema.
 const parseOverrides = ( argv ) => {
 	const eligibleParams = [
+		'browser',
 		'cookies',
 		'env',
 		'path',
@@ -47,6 +48,10 @@ const parseCommandLine = () => {
 	const argv = yargs
 		.option( 'action-files', {
 			alias: 'A',
+			type: 'string',
+		} )
+		.option( 'browser', {
+			alias: 'B',
 			type: 'string',
 		} )
 		.option( 'config-files', {

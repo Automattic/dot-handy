@@ -1,8 +1,7 @@
-const { createAction } = require( '../lib/action.js' );
+const { createAction, readAction } = require( '../lib/action.js' );
 const { getRootUrlFromEnv } = require( '../lib/misc.js' );
 
-// login as a test username.
-module.exports = createAction(
+const closeAccount = createAction(
 	async ( browser, context, page, extra ) => {
 		const { username } = extra.config;
 
@@ -20,6 +19,19 @@ module.exports = createAction(
 		await page.waitForSelector( 'div.account-close.is-loading', {
 			state: 'hidden',
 		} );
+
+		// if this is not null, it means that this account has pending effective purchases to remove.
+		const managePurchaseButton = await page.waitForSelector( 'css=a[href="/me/purchases"]', {
+			timeout: 1000,
+		} );
+
+		if ( managePurchaseButton ) {
+			const removePurchaseAction = readAction( 'remove-purchases' );
+
+			await removePurchaseAction.run( browser, context, page, extra );
+
+			return await closeAccount.run( browser, context, page, extra );
+		}
 
 		// click the Close Account button
 		await page.click( 'css=div.action-panel__cta >> css=button.is-scary' );
@@ -42,3 +54,5 @@ module.exports = createAction(
 	},
 	'/'
 );
+
+module.exports = closeAccount;

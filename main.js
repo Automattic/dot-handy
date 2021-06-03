@@ -7,11 +7,10 @@ const yargs = require( 'yargs' );
  * Internal dependencies
  */
 const {
-	configLocalStorage,
-	readConfigFiles,
+	setLocalStorage,
 	initialize,
-	mergeConfig,
 } = require( './lib/init.js' );
+const { readConfigFiles, mergeConfig } = require( './lib/config.js' );
 const { readActionFiles } = require( './lib/action.js' );
 const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.js' );
 
@@ -152,7 +151,7 @@ const main = async () => {
 			if ( firstNavigation ) {
 				await page.goto( getRootUrlFromEnv( unionConfig.env ) + action.initialPath );
 				if ( unionConfig.localStorage ) {
-					await configLocalStorage( page, unionConfig.localStorage );
+					await setLocalStorage( page, unionConfig.localStorage );
 				}
 
 				firstNavigation = false;

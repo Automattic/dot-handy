@@ -9,10 +9,10 @@ const yargs = require( 'yargs' );
 const {
 	configLocalStorage,
 	readConfigFiles,
-	readActionFiles,
 	initialize,
 	mergeConfig,
 } = require( './lib/init.js' );
+const { readActionFiles } = require( './lib/action.js' );
 const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.js' );
 
 // TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params. I should consider to implement a config schema.

@@ -1,4 +1,4 @@
-const { createAction, readAction } = require( '../lib/action.js' );
+const { createAction, readActionFile } = require( '../lib/action.js' );
 const { getRootUrlFromEnv } = require( '../lib/misc.js' );
 
 const closeAccount = createAction(
@@ -26,7 +26,14 @@ const closeAccount = createAction(
 		} );
 
 		if ( managePurchaseButton ) {
-			const removePurchaseAction = readAction( 'remove-purchases' );
+			const removePurchaseAction = readActionFile( 'remove-purchase' );
+
+			if ( ! removePurchaseAction ) {
+				console.error( 'Cannot find remove-purch' );
+				return {
+					abort: true,
+				};
+			}
 
 			await removePurchaseAction.run( browser, context, page, extra );
 

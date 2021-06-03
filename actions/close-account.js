@@ -16,11 +16,13 @@ module.exports = createAction(
 
 		await page.goto( getRootUrlFromEnv( extra.config.env ) + '/me/account/close' );
 
-		// this isn't perfect, but works for me :(
-		await page.waitForTimeout( 1000 );
+		// waiting for the placeholder to be gone
+		await page.waitForSelector( 'div.account-close.is-loading', {
+			state: 'hidden',
+		} );
 
 		// click the Close Account button
-		await page.click( 'css=div.action-panel >> css=button.is-scary' );
+		await page.click( 'css=div.action-panel__cta >> css=button.is-scary' );
 
 		// click the Continue button on the survey screen
 		await page.click( 'css=div.dialog__action-buttons >> css=button.is-primary' );
@@ -30,6 +32,9 @@ module.exports = createAction(
 
 		// final doom
 		await page.click( 'css=div.dialog__action-buttons >> css=button.is-scary' );
+
+		// waiting for the final screen
+		await page.waitForSelector( 'css=div.empty-content' );
 
 		return {
 			done: true,

@@ -20,16 +20,16 @@ const closeAccount = createAction(
 			state: 'hidden',
 		} );
 
-		// if this is not null, it means that this account has pending effective purchases to remove.
-		const managePurchaseButton = await page.waitForSelector( 'css=a[href="/me/purchases"]', {
-			timeout: 1000,
-		} );
+		try {
+			// if this button has presented, it means that this account has pending effective purchases to remove.
+			await page.waitForSelector( 'css=div.account-close a[href="/me/purchases"]', {
+				timeout: 1000,
+			} );
 
-		if ( managePurchaseButton ) {
-			const removePurchaseAction = readActionFile( 'remove-purchase' );
+			const removePurchaseAction = readActionFile( 'remove-all-purchases' );
 
 			if ( ! removePurchaseAction ) {
-				console.error( 'Cannot find remove-purch' );
+				console.error( 'Cannot find the action for removing all the purchases. Aborting.' );
 				return {
 					abort: true,
 				};
@@ -38,6 +38,8 @@ const closeAccount = createAction(
 			await removePurchaseAction.run( browser, context, page, extra );
 
 			return await closeAccount.run( browser, context, page, extra );
+		} catch {
+			console.log( '---------No remaing purchases. The account is ready to be closed.' );
 		}
 
 		// click the Close Account button

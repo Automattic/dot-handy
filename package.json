@@ -5,11 +5,12 @@
   "main": "main.js",
   "author": "James Tien <james.tien@automattic.com>",
   "license": "MIT",
-	"scripts": {
-		"start": "DEBUG=pw:api node main.js"
-	},
+  "scripts": {
+    "start": "DEBUG=pw:api node main.js"
+  },
   "devDependencies": {
     "playwright": "^1.8.1",
+    "validator": "^13.6.0",
     "yargs": "^16.2.0"
   }
 }

@@ -1,4 +1,4 @@
-const { createAction, readActionFile } = require( '../lib/action.js' );
+const { asyncIf, createAction, readActionFile } = require( '../lib/action.js' );
 const { getRootUrlFromEnv } = require( '../lib/misc.js' );
 
 const closeAccount = createAction(
@@ -20,26 +20,51 @@ const closeAccount = createAction(
 			state: 'hidden',
 		} );
 
-		try {
-			// if this button has presented, it means that this account has pending effective purchases to remove.
-			await page.waitForSelector( 'css=div.account-close a[href="/me/purchases"]', {
+
+		// if this button has presented, it means that this account has pending effective purchases to remove.
+		const startOver = await asyncIf(
+			async () => await page.waitForSelector( 'css=div.account-close a[href="/me/purchases"]', {
 				timeout: 1000,
-			} );
+			} ),
+			async () => {
+				const removeAllPurchases = readActionFile( 'remove-all-purchases' );
 
-			const removePurchaseAction = readActionFile( 'remove-all-purchases' );
+				if ( ! removeAllPurchases ) {
+					console.error( 'Cannot find the action for removing all the purchases. Aborting.' );
+					return {
+						abort: true,
+					};
+				}
 
-			if ( ! removePurchaseAction ) {
-				console.error( 'Cannot find the action for removing all the purchases. Aborting.' );
-				return {
-					abort: true,
-				};
-			}
+				await removeAllPurchases.run( browser, context, page, extra );
 
-			await removePurchaseAction.run( browser, context, page, extra );
+				return true;
+			},
+			async () => {
+				console.log( '---------No remaing purchases. The account is ready to be closed.' );
+			},
+		);
 
+		// FIXME: can't this be simpler?
+		if ( startOver ) {
 			return await closeAccount.run( browser, context, page, extra );
-		} catch {
-			console.log( '---------No remaing purchases. The account is ready to be closed.' );
+		}
+
+		// if it's an Atomic site. There is nothing we can automate from here :shrug:
+		const isAtomic = await asyncIf(
+			async () => page.waitForSelector( 'div.action-panel__cta a[href="/help/contact"]', {
+				timeout: 1000,
+			} ),
+			async () => {
+				return true;
+			},
+		);
+
+		if ( isAtomic ) {
+			console.log( "-------------------- It is an Atomic site. So let's dance and move on from here." );
+			return {
+				done: true,
+			};
 		}
 
 		// click the Close Account button

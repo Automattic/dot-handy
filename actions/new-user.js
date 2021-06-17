@@ -1,5 +1,5 @@
 const { createAction } = require( '../lib/action.js' );
-const { generateRandomString } = require( '../lib/misc.js' );
+const { asyncIf, generateRandomString } = require( '../lib/misc.js' );
 
 // creating a new user at the /user step
 module.exports = createAction(
@@ -26,7 +26,13 @@ module.exports = createAction(
 		const userName = newUserGmailPrefix + randSerial;
 
 		await page.fill( 'css=input#email', email );
-		await page.fill( 'css=input#username', userName );
+
+		await asyncIf(
+			async () => page.fill( 'css=input#username', userName, {
+				timeout: 1000,
+			} ),
+			() => {},
+		);
 		await page.fill( 'css=input#password', password );
 		await page.click( 'css=button[type="submit"]' );
 

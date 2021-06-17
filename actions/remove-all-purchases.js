@@ -6,8 +6,8 @@ const validator = require( 'validator' );
 /**
  * Internal dependencies
  */
-const { asyncIf, createAction } = require( '../lib/action.js' );
-const { getRootUrlFromEnv } = require( '../lib/misc.js' );
+const { createAction } = require( '../lib/action.js' );
+const { asyncIf, getRootUrlFromEnv } = require( '../lib/misc.js' );
 
 const extractDomainStringfromDialog = async ( page ) => {
 	const candidateElems = await page.$$( 'css=.remove-domain-dialog__dialog p strong' );

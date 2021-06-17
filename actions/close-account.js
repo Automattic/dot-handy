@@ -1,5 +1,5 @@
-const { asyncIf, createAction, readActionFile } = require( '../lib/action.js' );
-const { getRootUrlFromEnv } = require( '../lib/misc.js' );
+const { createAction, readActionFile } = require( '../lib/action.js' );
+const { asyncIf, getRootUrlFromEnv } = require( '../lib/misc.js' );
 
 const closeAccount = createAction(
 	async ( browser, context, page, extra ) => {

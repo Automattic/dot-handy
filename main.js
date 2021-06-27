@@ -19,6 +19,7 @@ const parseOverrides = ( argv ) => {
 	const eligibleParams = [
 		'browser',
 		'cookies',
+		'currency',
 		'env',
 		'path',
 		'username',
@@ -58,6 +59,9 @@ const parseCommandLine = () => {
 			type: 'string',
 		} )
 		.option( 'cookies', {
+			type: 'string',
+		} )
+		.option( 'currency', {
 			type: 'string',
 		} )
 		.option( 'env', {

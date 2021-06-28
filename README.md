@@ -12,10 +12,9 @@ Say goodbye to messing up with your browsers for daily uses.
 dot-handy uses Playwright internally to implement the above two concepts as **configuration** and **actions**.
 
 Configuration here simply means browser configuration you want to use to initiatialize your browser instance. e.g. browser type, locale, cookies, and local storage. 
-Except for general browser settings, there are also dotcom-specific properties available like the currency. Configuration can be supplied
+Except for general browser settings, there are also dotcom-specific properties available like `--currency`. Configuration can be supplied
 through either a JSON configuration file or commandline options. A configuration file is first looked up from `local-configs` directory and then `configs` directory.
-The coresponding properties supplied by the commandline options will override eventually. `-C` or `--config-files` options are used to supply config files; 
-for the most up-to-date, [referring to the source code](https://github.com/Automattic/dot-handy/blob/trunk/main.js#L47) will be the best.
+The coresponding properties supplied by the commandline options will override. `-C` or `--config-files` options are used to supply config files; the corresponding commandline options for the properties are a bit ad hoc. For the most up-to-date list of properties and their commandline options, [referring to the source code](https://github.com/Automattic/dot-handy/blob/trunk/main.js#L47) will be the best.
 
 Actions here refers to browser automation scripts that will be run automatically. Currently they can only be supplied by `-A` or `--action-files` commandline option.
 e.g. `yarn start -A new-user,pick-free-domain,pick-free-plan` means to open a new browser instance and then to create a new user, pick a free domain, 

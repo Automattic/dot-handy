@@ -18,7 +18,7 @@ The coresponding properties supplied by the commandline options will override. `
 
 Actions here refers to browser automation scripts that will be run after initiating. Currently they can only be supplied by `-A` or `--action-files` commandline option.
 e.g. `yarn start -A new-user,pick-free-domain,pick-free-plan` means to open a new browser instance and then to create a new user, pick a free domain, 
-and then choose the Free plan. It's kind of limiting right now because we can't user them in-between our own manual testing. An action file is looked up in a similar manner
+and then choose the Free plan. It's kind of limiting right now because we can't use them in-between our own manual testing. An action file is looked up in a similar manner
 like configuration files: `local-actions` will be looked up first, and then `actions` directory. Actions can require certain configuration properties to work, 
 like the action for setting ExPlat variations.
 

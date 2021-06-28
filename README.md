@@ -2,12 +2,12 @@
 
 Just a handy utility to make your life testing dotcom things easier. 
 
-As dotcom developers, we often need to configure our browser instance in certain ways and perform repetitive actions upon a task, so this utility aims to ease those burdens 
+As dotcom developers, we often need to configure our browser instance in certain ways and perform repetitive actions upon a task, so this utility aims to ease the burden 
 by:
 
-1. Let you put the browser configuration you need to apply now into a configuration file, so you don't need to tweak them again and again. 
+1. Let you put the browser configuration you need to apply for what you are working on into a configuration file, so you don't need to tweak them again and again. 
 Say goodbye to messing up with your browsers for daily uses. 
-1. Manage your own browser automation scripts for repetitive tasks in a way that's less involving like a formal e2e test.
+1. Manage your own browser automation scripts for repetitive tasks in a way that's less involving than a formal e2e test.
 
 dot-handy uses Playwright internally to implement the above two concepts as **configuration** and **actions**.
 

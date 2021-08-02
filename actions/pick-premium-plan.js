@@ -8,5 +8,5 @@ module.exports = createAction(
 
 		return {};
 	},
-	'/plans/'
+	'/plans'
 );

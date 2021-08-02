@@ -151,7 +151,9 @@ const main = async () => {
 			continue;
 		}
 
-		if ( action.initialPath != null ) {
+		const { initialPath } = action;
+
+		if ( initialPath != null ) {
 			if ( firstNavigation ) {
 				await page.goto( getRootUrlFromEnv( unionConfig.env ) + action.initialPath );
 				if ( unionConfig.localStorage ) {
@@ -160,7 +162,15 @@ const main = async () => {
 
 				firstNavigation = false;
 			} else {
-				await page.waitForNavigation( action.initialPath );
+				const initialPathRegex = new RegExp( action.initialPath, 'i' );
+				const currentUrl = new URL( page.url() );
+
+				// using a regex match here because I don't want it to be too strict.
+				if ( ! initialPathRegex.test( currentUrl ) ) {
+					await page.waitForNavigation( {
+						url: initialPathRegex,
+					} );
+				}
 			}
 		}
 		// finish up all the queued preparation

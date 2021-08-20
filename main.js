@@ -18,6 +18,7 @@ const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.j
 const parseOverrides = ( argv ) => {
 	const eligibleParams = [
 		'browser',
+		'explat-experiments',
 		'cookies',
 		'currency',
 		'env',
@@ -34,10 +35,32 @@ const parseOverrides = ( argv ) => {
 		if ( argv[ key ] ) {
 			// FIXME: terrible!
 			if ( key == 'localstorage' || key == 'cookies' ) {
-				overrides[ key ] = JSON.parse( argv[ key] );
-				continue;
+				overrides[ key ] = JSON.parse( argv[ key ] );
+			} else if ( key == 'explat-experiments' ) { // FIXME: OMG!!
+				const elems = parseNonSpaceSeparatedList( argv[ key ] );
+				const experiments = [];
+
+				if ( elems.length % 2 != 0 ) {
+					console.error( 'explat-experiments: slugs and variants should come in pairs' );
+					continue;
+				}
+
+				for( let i = 0; i < elems.length; i += 2 ) {
+					const slug = elems[ i ];
+					let variant = elems[ i + 1 ];
+					// base level sanitizing ...
+					if ( i % 2 == 0 && variant !== 'treatment' && variant !== 'control' ) {
+						console.error( 'explat-experiments: variant should be either treatment or control.', variant, 'is given. Use control as default.' );
+						variant = 'control';
+					}
+					experiments.push( [ slug, variant ] );
+				}
+
+				overrides['explatExperiments'] = experiments;
+
+			} else {
+				overrides[ key ] = argv[ key];
 			}
-			overrides[ key ] = argv[ key];
 		}
 	}
 
@@ -66,6 +89,9 @@ const parseCommandLine = () => {
 		} )
 		.option( 'env', {
 			alias: 'E',
+			type: 'string',
+		} )
+		.option( 'explat-experiments', {
 			type: 'string',
 		} )
 		.option( 'locale', {

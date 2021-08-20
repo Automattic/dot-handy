@@ -37,7 +37,7 @@ const setExperimentVariation = async ( [ experimentSlug, variation ] ) => {
     };
     if (token && token.accessToken) {
         headers.Authorization = 'Bearer ' + token['accessToken'];
-        usernameOverride = prompt(`This will assign a logged-in user to the ${variation} variation of pricing_page_free_vs_limited. ' + 'You have two options:\n' + '(1) Enter a username to assign (only works for staging experiments).\n + (2) Leave blank to assign yourself (works for any status).`);
+        usernameOverride = prompt(`This will assign a logged-in user to the ${variation} variation of pricing_page_free_vs_limited. 'You have two options:\n' + '(1) Enter a username to assign (only works for staging experiments).\n (2) Leave blank to assign yourself (works for any status).`);
     }
     const response = await fetch('https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments', {
         credentials: 'include',
@@ -73,7 +73,7 @@ const setExperimentVariation = async ( [ experimentSlug, variation ] ) => {
                 return 'An unknown error occurred: ' + responseBody.message;
                 break;
             }
-            const baseMessage = `ExPlat: Successful Assignment\n%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93\n\n' + 'Experiment: ${experimentSlug} \nVariation: ${variation}\n\n`;
+            const baseMessage = `ExPlat: Successful Assignment\n%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93%E2%80%93\n\n Experiment: ${experimentSlug} \nVariation: ${variation}\n\n`;
             if (responseBody.storage_method === 'anon_sqooped_out_table') {
                 return baseMessage + 'Method: Logged-out assignment\nApplies to the current anon user (tk_ai cookie).';
             } else {

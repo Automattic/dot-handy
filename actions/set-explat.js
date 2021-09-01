@@ -13,6 +13,11 @@ module.exports = createPreparation(
 			};
 		}
 
+		// Make sure the cookie is set before proceeding. Specifically, `tk_ai` might not be ready when we reach here.
+		await page.waitForFunction( () => {
+			return document.cookie !== '';
+		} );
+
 		for ( const instance of explatExperiments ) {
 			const message = await page.evaluate( setExperimentVariation, instance );
 			console.log( message );
@@ -51,6 +56,7 @@ const setExperimentVariation = async ( [ experimentSlug, variation ] ) => {
             username_override: usernameOverride
         })
     });
+
     const responseBody = await response.json();
     switch (responseBody.code) {
         case 'variation_not_found':

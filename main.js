@@ -163,15 +163,23 @@ const main = async () => {
 		page,
 	} = await initialize( unionConfig );
 
+	const runPreps = async ( preps ) => {
+		for ( const preparation of preps ) {
+			await preparation.run( browser, context, page, extra )
+		}
+	}
+
 	const extra = {
 		config: unionConfig, // to make it accessible in each action.
 	};
 	let firstNavigation = true;
 	let preps = [];
+
 	for ( const action of actions ) {
 		// A "preparation" action is a special kind of actions that are queued and run before a normal action.
 		// A good example for this is `set-explat`. It doesn't have any specific starting point, and will normally need
-		// to happen right after navigation but before the automated actions taking place.
+		// to happen right after navigation but before the automated actions taking place. For more details, please refer to
+		// the JSDoc of `createPreparation()`.
 		if ( action.isPreparation ) {
 			preps.push( action );
 			continue;
@@ -180,8 +188,12 @@ const main = async () => {
 		const { initialPath } = action;
 
 		if ( initialPath != null ) {
+			// Navigate to the initial path when encountering a first non-preparation action.
+			// If a smarter, general way of deciding when navigating to the initial path should happen, this can be eliminated and I'll be happy.
 			if ( firstNavigation ) {
 				await page.goto( getRootUrlFromEnv( unionConfig.env ) + action.initialPath );
+
+				// Localstorage can't be set without a domain, hence putting it here.
 				if ( unionConfig.localStorage ) {
 					await setLocalStorage( page, unionConfig.localStorage );
 				}
@@ -200,9 +212,7 @@ const main = async () => {
 			}
 		}
 		// finish up all the queued preparation
-		for ( const preparation of preps ) {
-			await preparation.run( browser, context, page, extra )
-		}
+		runPreps( preps );
 		preps = [];
 
 		const newExtra = await action.run( browser, context, page, extra )
@@ -221,7 +231,10 @@ const main = async () => {
 
 			Object.assign( extra, newExtra );
 		}
-	}
+	} // for ( const action ... )
+
+	// if there are unfinished preparation actions, finishing them up here.
+	runPreps( preps );
 }
 
 main();

@@ -1,4 +1,4 @@
-const { createAction, readActionFile } = require( '../lib/action.js' );
+const { createAction, readActionFile, abort, done } = require( '../lib/action.js' );
 const { asyncIf, getRootUrlFromEnv } = require( '../lib/misc.js' );
 
 const closeAccount = createAction(
@@ -8,9 +8,7 @@ const closeAccount = createAction(
 		if ( ! username ) {
 			console.error( 'No username is supplied. Please note that close-account should go after a successful login.' );
 
-			return {
-				abort: true,
-			};
+			return abort();
 		}
 
 		await page.goto( getRootUrlFromEnv( extra.config.env ) + '/me/account/close' );
@@ -31,9 +29,7 @@ const closeAccount = createAction(
 
 				if ( ! removeAllPurchases ) {
 					console.error( 'Cannot find the action for removing all the purchases. Aborting.' );
-					return {
-						abort: true,
-					};
+					return abort();
 				}
 
 				await removeAllPurchases.run( browser, context, page, extra );
@@ -62,9 +58,7 @@ const closeAccount = createAction(
 
 		if ( isAtomic ) {
 			console.log( "-------------------- It is an Atomic site. So let's dance and move on from here." );
-			return {
-				done: true,
-			};
+			return done();
 		}
 
 		// click the Close Account button
@@ -82,9 +76,7 @@ const closeAccount = createAction(
 		// waiting for the final screen
 		await page.waitForSelector( 'css=div.empty-content' );
 
-		return {
-			done: true,
-		};
+		return done();
 	},
 	'/'
 );

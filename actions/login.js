@@ -1,4 +1,4 @@
-const { createAction } = require( '../lib/action.js' );
+const { createAction, abort } = require( '../lib/action.js' );
 
 // login as a test username.
 module.exports = createAction(
@@ -8,9 +8,7 @@ module.exports = createAction(
 		if ( ! username || ! password ) {
 			console.error( 'Please supply the login credentials via `username` and `password` config fields. Try create a local config file under `/local-configs` with these fields and supply it through -C.' );
 
-			return {
-				abort: true,
-			};
+			return abort();
 		}
 
 		await page.fill( 'css=input#usernameOrEmail', username );

@@ -11,7 +11,7 @@ const {
 	initialize,
 } = require( './lib/init.js' );
 const { readConfigFiles, mergeConfig } = require( './lib/config.js' );
-const { readActionFiles } = require( './lib/action.js' );
+const { readActionFiles, isDone, isAbort } = require( './lib/action.js' );
 const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.js' );
 
 // TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params. I should consider to implement a config schema.
@@ -163,13 +163,38 @@ const main = async () => {
 		page,
 	} = await initialize( unionConfig );
 
-	const runPreps = async ( preps ) => {
-		for ( const preparation of preps ) {
-			await preparation.run( browser, context, page, extra )
+	const runAction = async ( action, extra ) => {
+		const actionResult = await action.run( browser, context, page, extra )
+
+		if ( actionResult ) {
+			// An action claims that there is something worth aborting.
+			if ( isAbort( actionResult ) ) {
+				process.exit( -1 );
+			}
+
+			// An intentional exit that indicates no further action should follow.
+			if ( isDone( actionResult ) ) {
+				process.exit( 0 );
+			}
+
+			Object.assign( extra, actionResult );
 		}
+
+		return extra;
+	};
+
+	const runPreps = async ( preps, extra ) => {
+		let newExtra = {
+			...extra,
+		};
+		for ( const preparation of preps ) {
+			Object.assign( newExtra, await runAction( preparation, extra ) );
+		}
+
+		return newExtra;
 	}
 
-	const extra = {
+	let extra = {
 		config: unionConfig, // to make it accessible in each action.
 	};
 	let firstNavigation = true;
@@ -211,30 +236,13 @@ const main = async () => {
 				}
 			}
 		}
-		// finish up all the queued preparation
-		runPreps( preps );
+
+		extra = await runAction( action, await runPreps( preps, extra ) );
 		preps = [];
-
-		const newExtra = await action.run( browser, context, page, extra )
-
-		// TODO: Terrible. Generalize this thing by some common senses.
-		if ( newExtra ) {
-			// An action claims that there is something worth aborting.
-			if ( newExtra.abort ) {
-				process.exit( -1 );
-			}
-
-			// An intentional exit that indicates no further action should follow.
-			if ( newExtra.done ) {
-				process.exit( 0 );
-			}
-
-			Object.assign( extra, newExtra );
-		}
 	} // for ( const action ... )
 
 	// if there are unfinished preparation actions, finishing them up here.
-	runPreps( preps );
+	await runPreps( preps );
 }
 
 main();

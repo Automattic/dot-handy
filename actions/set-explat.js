@@ -1,16 +1,14 @@
-const { createPreparation } = require( '../lib/action.js' );
+const { createPreparation, abort } = require( '../lib/action.js' );
 
 // Set the variation of an ExPlat experiment.
 module.exports = createPreparation(
 	async ( browser, context, page, extra ) => {
 		const { explatExperiments } = extra.config;
 
-		if ( ! explatExperiments ) {
+		if ( ! explatExperiments || explatExperiments.length == 0 ) {
 			console.error( 'No ExPlat experiments given.' );
 
-			return {
-				abort: true,
-			};
+			return abort();
 		}
 
 		// Make sure the cookie is set before proceeding. Specifically, `tk_ai` might not be ready when we reach here.

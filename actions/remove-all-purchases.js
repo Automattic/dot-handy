@@ -6,7 +6,7 @@ const validator = require( 'validator' );
 /**
  * Internal dependencies
  */
-const { createAction } = require( '../lib/action.js' );
+const { createAction, abort } = require( '../lib/action.js' );
 const { asyncIf, getRootUrlFromEnv } = require( '../lib/misc.js' );
 
 const extractDomainStringfromDialog = async ( page ) => {
@@ -94,9 +94,7 @@ const removePurchase = createAction(
 				if ( ! domain ) {
 					console.error( 'Cannot find a domain string in the domain cancellation dialog. Aborting.' );
 
-					return {
-						abort: true,
-					};
+					return abort();
 				}
 
 				await page.fill( 'css=input[name="domain"]', domain );

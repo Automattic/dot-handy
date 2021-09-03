@@ -14,60 +14,46 @@ const { readConfigFiles, mergeConfig } = require( './lib/config.js' );
 const { readActionFiles, isDone, isAbort } = require( './lib/action.js' );
 const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.js' );
 
-// TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params. I should consider to implement a config schema.
-const parseOverrides = ( argv ) => {
-	const eligibleParams = [
-		'action-args',
-		'browser',
-		'explat-experiments',
-		'cookies',
-		'currency',
-		'env',
-		'path',
-		'username',
-		'password',
-		'localstorage',
-		'locale',
-	];
+// TODO:
+// This implementation will bring in unwanted props from yargs as well. e.g. the aliased fields, the wildcard field, etc.
+// Needs a better way to define the schema of the configuration object.
+const cmdArgsToConfig = ( argv ) => {
+	const convertHandler = {
+		actionArgs: ( rawArg ) => rawArg.map( actionArgStr => JSON.parse( actionArgStr ) ),
+		explatExperiments: ( rawArg ) => {
+			const elems = parseNonSpaceSeparatedList( rawArg );
+			const experiments = [];
 
-	const overrides = {};
-
-	for( const key of eligibleParams ) {
-		if ( argv[ key ] ) {
-			// FIXME: terrible!
-			if ( key == 'localstorage' || key == 'cookies' ) {
-				overrides[ key ] = JSON.parse( argv[ key ] );
-			} else if ( key == 'explat-experiments' ) { // FIXME: OMG!!
-				const elems = parseNonSpaceSeparatedList( argv[ key ] );
-				const experiments = [];
-
-				if ( elems.length % 2 != 0 ) {
-					console.error( 'explat-experiments: slugs and variants should come in pairs' );
-					continue;
-				}
-
-				for( let i = 0; i < elems.length; i += 2 ) {
-					const slug = elems[ i ];
-					let variant = elems[ i + 1 ];
-					// base level sanitizing ...
-					if ( i % 2 == 0 && variant !== 'treatment' && variant !== 'control' ) {
-						console.error( 'explat-experiments: variant should be either treatment or control.', variant, 'is given. Use control as default.' );
-						variant = 'control';
-					}
-					experiments.push( [ slug, variant ] );
-				}
-
-				overrides['explatExperiments'] = experiments;
-
-			} else if ( key == 'action-args' ) { //FIXME: O.M.G.
-				const actionArgs = argv[ key ];
-			} else {
-				overrides[ key ] = argv[ key];
+			if ( elems.length % 2 != 0 ) {
+				console.error( 'explat-experiments: slugs and variants should come in pairs' );
+				return [];
 			}
-		}
-	}
 
-	return overrides;
+			for( let i = 0; i < elems.length; i += 2 ) {
+				const slug = elems[ i ];
+				let variant = elems[ i + 1 ];
+				// base level sanitizing ...
+				if ( i % 2 == 0 && variant !== 'treatment' && variant !== 'control' ) {
+					console.error( 'explat-experiments: variant should be either treatment or control.', variant, 'is given. Use control as default.' );
+					variant = 'control';
+				}
+				experiments.push( [ slug, variant ] );
+			}
+
+			return experiments;
+		},
+		cookies: ( rawArg ) => JSON.parse( rawArg ),
+		localstorage: rawArg => JSON.parse( rawArg ),
+	};
+
+	const converted = { ... argv };
+
+	Object.keys( argv ).map( ( key ) => {
+		const val = converted[ key ];
+		converted[ key ] = convertHandler[ key ] ? convertHandler[ key ]( val ) : val;
+	} );
+
+	return converted;
 };
 
 const processCmds = () => {
@@ -123,12 +109,12 @@ const processCmds = () => {
 
 	const configFiles = parseNonSpaceSeparatedList( argv.configFiles );
 	const actionFiles = parseNonSpaceSeparatedList( argv.actionFiles );
-	const overrides = parseOverrides( argv );
+	const configFromCmdArgs = cmdArgsToConfig( argv );
 
 	return {
-		configFiles,
 		actionFiles,
-		overrides,
+		configFiles,
+		configFromCmdArgs,
 	};
 };
 
@@ -136,7 +122,7 @@ const setup = () => {
 	const {
 		configFiles,
 		actionFiles,
-		overrides,
+		configFromCmdArgs,
 	} = processCmds();
 
 	const configs = readConfigFiles( [
@@ -165,7 +151,7 @@ const setup = () => {
 	const actionArgs = [];
 
 	return {
-		config: mergeConfig( configs, overrides ),
+		config: mergeConfig( configs, configFromCmdArgs ),
 		actions,
 		actionFiles,
 		actionArgs,

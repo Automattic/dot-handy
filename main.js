@@ -17,6 +17,7 @@ const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.j
 // TODO: this shouldn't be too hard to generalized to enable complete overriding of config flags through commandline params. I should consider to implement a config schema.
 const parseOverrides = ( argv ) => {
 	const eligibleParams = [
+		'action-args',
 		'browser',
 		'explat-experiments',
 		'cookies',
@@ -58,6 +59,8 @@ const parseOverrides = ( argv ) => {
 
 				overrides['explatExperiments'] = experiments;
 
+			} else if ( key == 'action-args' ) { //FIXME: O.M.G.
+				const actionArgs = argv[ key ];
 			} else {
 				overrides[ key ] = argv[ key];
 			}
@@ -67,11 +70,15 @@ const parseOverrides = ( argv ) => {
 	return overrides;
 };
 
-const parseCommandLine = () => {
+const processCmds = () => {
 	const argv = yargs
 		.option( 'action-files', {
 			alias: 'A',
 			type: 'string',
+		} )
+		.option( 'action-args', {
+			alias: 'AR',
+			type: 'array',
 		} )
 		.option( 'browser', {
 			alias: 'B',
@@ -125,12 +132,12 @@ const parseCommandLine = () => {
 	};
 };
 
-const main = async () => {
+const setup = () => {
 	const {
 		configFiles,
 		actionFiles,
 		overrides,
-	} = parseCommandLine();
+	} = processCmds();
 
 	const configs = readConfigFiles( [
 		'default-config',
@@ -143,25 +150,45 @@ const main = async () => {
 		process.exit( -1 );
 	}
 
-	const unionConfig = mergeConfig( configs, overrides );
-
-	console.log( '------ Configuration:\n', unionConfig );
-
 	if ( actionFiles.length === 0 ) {
 		console.log( '------ No action provided. The default "navigate" will be queued.' );
 		actionFiles.push( 'navigate' );
 	}
 
+	const actions = readActionFiles( actionFiles );
+
+	if ( actions.error ) {
+		console.error( 'A fatal error has occured when reading the action: ', actions.meta.actionFile, actions.meta.code );
+		process.exit( -1 );
+	}
+
+	const actionArgs = [];
+
+	return {
+		config: mergeConfig( configs, overrides ),
+		actions,
+		actionFiles,
+		actionArgs,
+	};
+};
+
+const main = async () => {
+	const {
+		config,
+		actions,
+		actionFiles,
+		actionArgs,
+	} = setup();
+
+	console.log( '------ Configuration:\n', config );
 	console.log( '------ Series of action scripts that will be performing:\n' );
 	console.log( actionFiles );
-
-	const actions = readActionFiles( actionFiles );
 
 	const {
 		browser,
 		context,
 		page,
-	} = await initialize( unionConfig );
+	} = await initialize( config );
 
 	const runAction = async ( action, extra ) => {
 		const actionResult = await action.run( browser, context, page, extra )
@@ -195,7 +222,7 @@ const main = async () => {
 	}
 
 	let extra = {
-		config: unionConfig, // to make it accessible in each action.
+		config: config, // to make it accessible in each action.
 	};
 	let firstNavigation = true;
 	let preps = [];
@@ -216,11 +243,11 @@ const main = async () => {
 			// Navigate to the initial path when encountering a first non-preparation action.
 			// If a smarter, general way of deciding when navigating to the initial path should happen, this can be eliminated and I'll be happy.
 			if ( firstNavigation ) {
-				await page.goto( getRootUrlFromEnv( unionConfig.env ) + action.initialPath );
+				await page.goto( getRootUrlFromEnv( config.env ) + action.initialPath );
 
 				// Localstorage can't be set without a domain, hence putting it here.
-				if ( unionConfig.localStorage ) {
-					await setLocalStorage( page, unionConfig.localStorage );
+				if ( config.localStorage ) {
+					await setLocalStorage( page, config.localStorage );
 				}
 
 				firstNavigation = false;

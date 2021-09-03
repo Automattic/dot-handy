@@ -158,7 +158,7 @@ const setup = () => {
 	const actions = readActionFiles( actionFiles );
 
 	if ( actions.error ) {
-		console.error( 'A fatal error has occured when reading the action: ', actions.meta.actionFile, actions.meta.code );
+		console.error( 'A fatal error has occured when reading the action: ', actions.meta.fileName, actions.meta.code );
 		process.exit( -1 );
 	}
 

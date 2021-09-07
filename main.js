@@ -6,13 +6,15 @@ const yargs = require( 'yargs' );
 /**
  * Internal dependencies
  */
-const {
-	setLocalStorage,
-	initialize,
-} = require( './lib/init.js' );
+const { initialize } = require( './lib/init.js' );
 const { readConfigFiles, mergeConfig } = require( './lib/config.js' );
-const { readActionFiles, isDone, isAbort } = require( './lib/action.js' );
-const { getRootUrlFromEnv, parseNonSpaceSeparatedList } = require( './lib/misc.js' );
+const {
+	readActionFiles,
+	runActions,
+	isAbort,
+	isDone,
+} = require( './lib/action.js' );
+const { parseNonSpaceSeparatedList } = require( './lib/misc.js' );
 
 // TODO:
 // This implementation will bring in unwanted props from yargs as well. e.g. the aliased fields, the wildcard field, etc.
@@ -176,86 +178,15 @@ const main = async () => {
 		page,
 	} = await initialize( config );
 
-	const runAction = async ( action, extra ) => {
-		const actionResult = await action.run( browser, context, page, extra )
+	const result = await runActions( browser, context, page, config, actions );
 
-		if ( actionResult ) {
-			// An action claims that there is something worth aborting.
-			if ( isAbort( actionResult ) ) {
-				process.exit( -1 );
-			}
-
-			// An intentional exit that indicates no further action should follow.
-			if ( isDone( actionResult ) ) {
-				process.exit( 0 );
-			}
-
-			Object.assign( extra, actionResult );
-		}
-
-		return extra;
-	};
-
-	const runPreps = async ( preps, extra ) => {
-		let newExtra = {
-			...extra,
-		};
-		for ( const preparation of preps ) {
-			Object.assign( newExtra, await runAction( preparation, extra ) );
-		}
-
-		return newExtra;
+	if ( isAbort( result ) ) {
+		process.abort();
 	}
 
-	let extra = {
-		config: config, // to make it accessible in each action.
-	};
-	let firstNavigation = true;
-	let preps = [];
-
-	for ( const action of actions ) {
-		// A "preparation" action is a special kind of actions that are queued and run before a normal action.
-		// A good example for this is `set-explat`. It doesn't have any specific starting point, and will normally need
-		// to happen right after navigation but before the automated actions taking place. For more details, please refer to
-		// the JSDoc of `createPreparation()`.
-		if ( action.isPreparation ) {
-			preps.push( action );
-			continue;
-		}
-
-		const { initialPath } = action;
-
-		if ( initialPath != null ) {
-			// Navigate to the initial path when encountering a first non-preparation action.
-			// If a smarter, general way of deciding when navigating to the initial path should happen, this can be eliminated and I'll be happy.
-			if ( firstNavigation ) {
-				await page.goto( getRootUrlFromEnv( config.env ) + action.initialPath );
-
-				// Localstorage can't be set without a domain, hence putting it here.
-				if ( config.localStorage ) {
-					await setLocalStorage( page, config.localStorage );
-				}
-
-				firstNavigation = false;
-			} else {
-				const initialPathRegex = new RegExp( action.initialPath, 'i' );
-				const currentUrl = new URL( page.url() );
-
-				// using a regex match here because I don't want it to be too strict.
-				if ( ! initialPathRegex.test( currentUrl ) ) {
-					await page.waitForNavigation( {
-						url: initialPathRegex,
-					} );
-				}
-			}
-		}
-
-		extra = await runAction( action, await runPreps( preps, extra ) );
-		preps = [];
-	} // for ( const action ... )
-
-	// if there are unfinished preparation actions, finishing them up here.
-	await runPreps( preps );
+	if ( isDone( result ) ) {
+		process.exit();
+	}
 }
 
 main();

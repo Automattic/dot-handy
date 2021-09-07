@@ -21,9 +21,7 @@ const { parseNonSpaceSeparatedList } = require( './lib/misc.js' );
 // Needs a better way to define the schema of the configuration object.
 const cmdArgsToConfig = ( argv ) => {
 	const convertHandler = {
-		actionArgs: ( rawArg ) => rawArg.map( actionArgStr => JSON.parse( actionArgStr ) ),
-		explatExperiments: ( rawArg ) => {
-			const elems = parseNonSpaceSeparatedList( rawArg );
+		explatExperiments: ( elems ) => {
 			const experiments = [];
 
 			if ( elems.length % 2 != 0 ) {
@@ -62,7 +60,7 @@ const processCmds = () => {
 	const argv = yargs
 		.option( 'action-files', {
 			alias: 'A',
-			type: 'string',
+			type: 'array',
 		} )
 		.option( 'action-args', {
 			alias: 'AR',
@@ -74,7 +72,7 @@ const processCmds = () => {
 		} )
 		.option( 'config-files', {
 			alias: 'C',
-			type: 'string',
+			type: 'array',
 		} )
 		.option( 'cookies', {
 			type: 'string',
@@ -87,7 +85,7 @@ const processCmds = () => {
 			type: 'string',
 		} )
 		.option( 'explat-experiments', {
-			type: 'string',
+			type: 'array',
 		} )
 		.option( 'locale', {
 			alias: 'LC',
@@ -109,8 +107,11 @@ const processCmds = () => {
 		} )
 		.argv;
 
-	const configFiles = parseNonSpaceSeparatedList( argv.configFiles );
-	const actionFiles = parseNonSpaceSeparatedList( argv.actionFiles );
+	const {
+		configFiles = [],
+		actionFiles = [],
+	} = argv;
+
 	const configFromCmdArgs = cmdArgsToConfig( argv );
 
 	return {

@@ -3,8 +3,8 @@ const { asyncIf, generateRandomString } = require( '../lib/misc.js' );
 
 // creating a new user at the /user step
 module.exports = createAction(
-	async ( browser, context, page, extra ) => {
-		const { newUserGmailPrefix, password } = extra.config;
+	async ( browser, context, page, config ) => {
+		const { newUserGmailPrefix, password } = config;
 
 		if ( ! newUserGmailPrefix ) {
 			console.error( 'The current new-user action relies on the gmail `+` trick to create a random user. Please supply one through a local-config file as `newUserGmailPrefix` field.' );

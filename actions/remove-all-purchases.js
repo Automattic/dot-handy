@@ -24,7 +24,7 @@ const extractDomainStringfromDialog = async ( page ) => {
 };
 
 const removePurchase = createAction(
-	async ( browser, context, page, extra ) => {
+	async ( browser, context, page, config ) => {
 
 		// go into the 1st one. Yeah, it's weird that :last-child actually refers to the 1st one in Playwright somehow.
 		await page.click( 'css=a[data-e2e-connected-site=true]:last-child' );
@@ -109,17 +109,17 @@ const removePurchase = createAction(
 );
 
 const removeAllPurchases = createAction(
-	async ( browser, context, page, extra ) => {
-		await page.goto( getRootUrlFromEnv( extra.config.env ) + '/me/purchases' );
+	async ( browser, context, page, config ) => {
+		await page.goto( getRootUrlFromEnv( config.env ) + '/me/purchases' );
 
 		return asyncIf(
 			async () => page.waitForSelector( 'css=a[data-e2e-connected-site=true]:last-child', {
 				timeout: 3000,
 			}),
 			async () => {
-				await removePurchase.run( browser, context, page, extra );
+				await removePurchase.run( browser, context, page, config );
 
-				return removeAllPurchases.run( browser, context, page, extra );
+				return removeAllPurchases.run( browser, context, page, config );
 			},
 		);
 	},

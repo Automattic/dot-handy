@@ -2,7 +2,7 @@ const { createAction } = require( '../lib/action' );
 
 // Checkout by the dummy card.
 module.exports = createAction(
-	async ( browser, context, page, extra ) => {
+	async ( browser, context, page, config, accum, args ) => {
 		// Wait for the grand total
 		await page.waitForSelector( 'css=.wp-checkout-order-summary__total-price' );
 

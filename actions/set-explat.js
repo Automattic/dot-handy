@@ -2,8 +2,8 @@ const { createPreparation, abort } = require( '../lib/action.js' );
 
 // Set the variation of an ExPlat experiment.
 module.exports = createPreparation(
-	async ( browser, context, page, extra ) => {
-		const { explatExperiments } = extra.config;
+	async ( browser, context, page, config ) => {
+		const { explatExperiments } = config;
 
 		if ( ! explatExperiments || explatExperiments.length == 0 ) {
 			console.error( 'No ExPlat experiments given.' );

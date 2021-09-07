@@ -138,11 +138,6 @@ const setup = () => {
 		process.exit( -1 );
 	}
 
-	if ( actionFiles.length === 0 ) {
-		console.log( '------ No action provided. The default "navigate" will be queued.' );
-		actionFiles.push( 'navigate' );
-	}
-
 	const actions = readActionFiles( actionFiles );
 
 	if ( actions.error ) {

@@ -17,7 +17,7 @@ through either a JSON configuration file or commandline options. A configuration
 The coresponding properties supplied by the commandline options will override. `-C` or `--config-files` options are used to supply config files; the corresponding commandline options for the properties are a bit ad hoc. For the most up-to-date list of properties and their commandline options, [referring to the source code](https://github.com/Automattic/dot-handy/blob/trunk/main.js#L47) will be the best.
 
 Actions here refers to browser automation scripts that will be run after initiating. Currently they can only be supplied by `-A` or `--action-files` commandline option.
-e.g. `yarn start -A new-user,pick-free-domain,pick-free-plan` means to open a new browser instance and then to create a new user, pick a free domain, 
+e.g. `yarn start -A new-user pick-free-domain pick-free-plan` means to open a new browser instance and then to create a new user, pick a free domain, 
 and then choose the Free plan. It's kind of limiting right now because we can't use them in-between our own manual testing. An action file is looked up in a similar manner
 like configuration files: `local-actions` will be looked up first, and then `actions` directory. Actions can require certain configuration properties to work, 
 like the action for setting ExPlat variations.
@@ -73,7 +73,7 @@ but that has given me a hard time closing test accounts. Thus it is implemented 
         "password": "MySuperSecretPassword"   <- this is also not real, of course.
 }
 ```
-3. Run `yarn start -A new-user,pick-free-domain,pick-business-plan,checkout`
+3. Run `yarn start -A new-user pick-free-domain pick-business-plan checkout`
 
 This will sign up a new account with the Business plan by appending a random string by the gmail `+` trick. 
 e.g. in this case, it could be `supertestingemail+jfsjfiwjadwijdw@gmail.com`.
@@ -94,7 +94,7 @@ e.g. Add a `local-configs/test-explat.json` like:
 then run:
 
 ```
-> yarn start -A set-explat,new-user,pick-free-domain,pick-free-plan -C test-explat
+> yarn start -A set-explat new-user pick-free-domain pick-free-plan -C test-explat
 ```
 
 #### 8. Create my own handy config that isn't appropriate to put in a public repo
@@ -117,13 +117,13 @@ then I'll run the following command to begin with:
 
 #### 9. Close a test account which owns only one simple site.
 ```
-yarn start -A login,close-account --username xxx --password yyy
+yarn start -A login close-account --username xxx --password yyy
 ```
 
 It's also possible to combine this with some good old shell trick to close test accounts in batch.
 Let's say all the test accounts are having the same password `yyy` and they are all listed in a plain text file, `test-accounts`, line-by-line. Then this will do:
 ```
-> cat test-accounts | xargs -L1 yarn start -A login,close-account --password yyy --username
+> cat test-accounts | xargs -L1 yarn start -A login close-account --password yyy --username
 ```
 
 #### 10. Use with GNU parallel to run several instances side by side
@@ -138,7 +138,7 @@ Comparing LOHP side by side per 3 different currencies:
 ```
 Comparing the control and the treatment variation of an ExPlat variation:
 ```
-> parallel ::: "yarn start -A set-explat,login -C test-account-1,exp-1-control" "yarn start -A set-explat,login -C test-account-2,exp-1-treatment"
+> parallel ::: "yarn start -A set-explat login -C test-account-1 exp-1-control" "yarn start -A set-explat login -C test-account-2 exp-1-treatment"
 ```
 We all know the domain resolution of `webkit` isnt' affected by `/etc/hosts`. Thus it can happen to be a convenient way to compare sandboxed vs unsandboxed version:
 ```

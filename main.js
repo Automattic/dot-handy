@@ -174,7 +174,10 @@ const main = async () => {
 		page,
 	} = await initialize( config );
 
-	const result = await runActions( browser, context, page, config, actions );
+	const result = await runActions(
+		{ browser, context, page, config },
+		actions
+	);
 
 	if ( isAbort( result ) ) {
 		process.abort();

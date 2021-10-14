@@ -3,7 +3,7 @@ const { asyncIf, getRootUrlFromEnv } = require( '../lib/misc.js' );
 
 const closeAccount = createAction(
 	async ( browser, context, page, config, accum, args ) => {
-		const { username } = config;
+		const username = config.username || accum.userName;
 
 		if ( ! username ) {
 			console.error( 'No username is supplied. Please note that close-account should go after a successful login.' );
@@ -68,7 +68,7 @@ const closeAccount = createAction(
 		await page.click( 'css=div.dialog__action-buttons >> css=button.is-primary' );
 
 		// fill in the username as the final confirmation
-		await page.fill( 'css=input#confirmAccountCloseInput', config.username );
+		await page.fill( 'css=input#confirmAccountCloseInput', username );
 
 		// final doom
 		await page.click( 'css=div.dialog__action-buttons >> css=button.is-scary' );

@@ -16,6 +16,7 @@ module.exports = createAction(
 
 		await page.fill( 'css=input#password', password );
 		await page.click( 'css=button[type="submit"]' );
+		await page.waitForNavigation( '/home' );
 
 		return {};
 	},

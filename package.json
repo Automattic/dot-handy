@@ -9,7 +9,7 @@
     "start": "DEBUG=pw:api node main.js"
   },
   "devDependencies": {
-    "playwright": "^1.8.1",
+    "playwright": "^1.18.1",
     "validator": "^13.6.0",
     "yargs": "^16.2.0"
   }

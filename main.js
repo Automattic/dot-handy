@@ -164,7 +164,12 @@ const main = async () => {
 		actionArgs,
 	} = setup();
 
-	console.log( '------ Configuration:\n', config );
+	const redacted = {
+		... config,
+		password: "馬賽克",
+	};
+
+	console.log( '------ Configuration:\n', redacted );
 	console.log( '------ Series of action scripts that will be performing:\n' );
 	console.log( actionFiles );
 

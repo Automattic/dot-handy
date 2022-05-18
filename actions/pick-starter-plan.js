@@ -4,7 +4,7 @@ const { createAction } = require( '../lib/action' );
 module.exports = createAction(
 	async ( browser, context, page ) => {
 		// Terrible, but it is what it is before a more semantic structure is introduced.
-		await page.click( 'text=start with a free site' );
+		await page.click( 'text=Choose Starter' );
 
 		return {};
 	},

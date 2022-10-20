@@ -32,7 +32,12 @@ const closeAccount = createAction(
 					return abort();
 				}
 
-				await removeAllPurchases.run( browser, context, page, extra );
+				try {
+					await removeAllPurchases.run( browser, context, page, config );
+				} catch ( error ) {
+					console.error( 'removeAllPurchases() error: ', error );
+					return abort();
+				}
 
 				return true;
 			},
@@ -43,7 +48,7 @@ const closeAccount = createAction(
 
 		// FIXME: can't this be simpler?
 		if ( startOver ) {
-			return await closeAccount.run( browser, context, page, extra );
+			return await closeAccount.run( browser, context, page, config );
 		}
 
 		// if it's an Atomic site. There is nothing we can automate from here :shrug:

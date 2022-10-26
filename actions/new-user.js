@@ -1,6 +1,17 @@
 const { createAction, abort } = require( '../lib/action.js' );
 const { asyncIf, generateRandomString } = require( '../lib/misc.js' );
 
+const fs = require( 'fs' );
+const NEW_USER_LOG_FILENAME = './new-user-log';
+
+const writeNewUserLog = ( username ) => {
+	try {
+		fs.appendFileSync( NEW_USER_LOG_FILENAME, username + "\n" );
+	} catch ( error ) {
+		console.error( 'Cannot write to the new user log, error: ', error );
+	}
+};
+
 // creating a new user at the /user step
 module.exports = createAction(
 	async ( browser, context, page, config ) => {
@@ -33,6 +44,7 @@ module.exports = createAction(
 		await page.click( 'css=button[type="submit"]' );
 
 		console.log( '------ user created:', userName, password );
+		writeNewUserLog( userName + ' ' + password );
 
 		return {
 			userName,

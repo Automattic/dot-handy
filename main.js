@@ -6,7 +6,11 @@ const yargs = require( 'yargs' );
 /**
  * Internal dependencies
  */
-const { initialize } = require( './lib/init.js' );
+const {
+	initialize,
+	goToStartUrl,
+	postFirstNavigationSetup
+} = require( './lib/init.js' );
 const { readConfigFiles, mergeConfig } = require( './lib/config.js' );
 const {
 	readActionFiles,
@@ -173,23 +177,26 @@ const main = async () => {
 	console.log( '------ Series of action scripts that will be performing:\n' );
 	console.log( actionFiles );
 
-	const {
-		browser,
-		context,
-		page,
-	} = await initialize( config );
+	const runEnv = await initialize( config );
 
-	const result = await runActions(
-		{ browser, context, page, config },
-		actions
-	);
+	try {
+		// the first navigation is special since there are things that we can only do after the page instance has a domain.
+		// e.g. setting a cookie without explicitly assigning a domain, the localstorage, etc.
+		await goToStartUrl( runEnv, actions );
 
-	if ( isAbort( result ) ) {
-		process.abort();
-	}
+		await postFirstNavigationSetup( runEnv );
 
-	if ( isDone( result ) ) {
-		process.exit();
+		const result = await runActions( runEnv, actions );
+
+		if ( isAbort( result ) ) {
+			process.abort();
+		}
+
+		if ( isDone( result ) ) {
+			process.exit();
+		}
+	} catch ( error ) {
+		console.error( 'Something goes wrong! 💣', error );
 	}
 }
 

@@ -3,8 +3,7 @@ const { createAction } = require( '../lib/action' );
 // Pick the Premium plan at the /plans step
 module.exports = createAction(
 	async ( browser, context, page, config ) => {
-		// plan step
-		await page.click( 'css=button.is-premium-plan' );
+		await page.click( 'button.is-premium-plan' );
 
 		return {};
 	},
